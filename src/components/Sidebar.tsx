@@ -28,7 +28,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       <nav className={cn('sidebar', open && 'open')}>
         <div className="sidebar-logo">
           <img src="/stocky-logo.png" alt="Stocky" className="sidebar-logo-img" />
-          <span className="sidebar-logo-text">STOCKY ANALYSE</span>
         </div>
         <div className="sidebar-nav">
           {navItems.map((item, i) => (
