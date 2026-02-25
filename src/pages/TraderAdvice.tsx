@@ -3,9 +3,10 @@ import { useReport } from '../context/ReportContext'
 import Card from '../components/Card'
 import ChartWrapper from '../components/ChartWrapper'
 import { fetchAdvice } from '../lib/api'
+import { generateAdvicePdf } from '../lib/generatePdf'
 import { formatCurrency, formatPercent } from '../lib/utils'
 import type { ReportData } from '../types/report'
-import type { AdviceResponse } from '../types/advice'
+import type { AdviceResponse, AdviceBullet } from '../types/advice'
 import {
   CheckCircle,
   AlertTriangle,
@@ -20,6 +21,9 @@ import {
   Scale,
   Zap,
   BrainCircuit,
+  Heart,
+  Flame,
+  FileDown,
 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts'
 
@@ -35,6 +39,14 @@ const SCORE_CONFIG: Record<string, { color: string; bg: string; label: string }>
   'C+': { color: '#f97316', bg: 'rgba(249, 115, 22, 0.12)', label: 'Average' },
   'C':  { color: '#f97316', bg: 'rgba(249, 115, 22, 0.10)', label: 'Below Average' },
   'D':  { color: '#eb3b3b', bg: 'rgba(235, 59, 59, 0.12)', label: 'Needs Work' },
+}
+
+const TAB_LABELS: Record<number, string> = {
+  0: 'Overview',
+  1: 'Performance',
+  2: 'Instruments',
+  3: 'Charges',
+  4: 'Portfolio',
 }
 
 const TRADING_LAWS = [
@@ -76,19 +88,20 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lawsExpanded, setLawsExpanded] = useState(false)
+  const [tone, setTone] = useState<'helpful' | 'roast'>('helpful')
 
   const loadAdvice = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const result = await fetchAdvice(report)
+      const result = await fetchAdvice(report, tone)
       setAdvice(result)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate advice')
     } finally {
       setLoading(false)
     }
-  }, [report])
+  }, [report, tone])
 
   useEffect(() => {
     loadAdvice()
@@ -103,6 +116,10 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
     { name: 'Full Kelly', value: advice.kelly_pct, fill: '#eb3b3b' },
     { name: 'Half Kelly', value: advice.half_kelly_pct, fill: '#3b82f6' },
   ]
+
+  const handleDownloadPdf = () => {
+    generateAdvicePdf(advice, report.metadata.date_range)
+  }
 
   return (
     <div className="space-y-6">
@@ -131,7 +148,30 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Tone Toggle */}
+            <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-medium)' }}>
+              <button
+                onClick={() => setTone('helpful')}
+                className="px-3 py-2 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                style={{
+                  background: tone === 'helpful' ? 'rgba(34, 197, 94, 0.15)' : 'transparent',
+                  color: tone === 'helpful' ? '#22c55e' : 'var(--text-secondary)',
+                }}
+              >
+                <Heart size={12} /> Helpful
+              </button>
+              <button
+                onClick={() => setTone('roast')}
+                className="px-3 py-2 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                style={{
+                  background: tone === 'roast' ? 'rgba(249, 115, 22, 0.15)' : 'transparent',
+                  color: tone === 'roast' ? '#f97316' : 'var(--text-secondary)',
+                }}
+              >
+                <Flame size={12} /> Roast Me
+              </button>
+            </div>
             {/* Score Badge */}
             <div className="text-center px-5 py-3 rounded-xl" style={{
               background: scoreConfig.bg,
@@ -148,9 +188,30 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
             <button onClick={loadAdvice} className="btn-secondary">
               <RefreshCw size={14} /> Regenerate
             </button>
+            {/* PDF Download */}
+            <button onClick={handleDownloadPdf} className="btn-secondary">
+              <FileDown size={14} /> <span className="hidden md:inline">PDF</span>
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Executive Summary */}
+      {advice.summary && (
+        <div className="card" style={{
+          borderImage: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.3)) 1',
+        }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles size={16} color="#a78bfa" />
+            <span className="text-sm font-semibold uppercase tracking-wider" style={{ color: '#a78bfa' }}>
+              Executive Summary
+            </span>
+          </div>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+            {advice.summary}
+          </p>
+        </div>
+      )}
 
       {/* Three Column Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -164,10 +225,7 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
           </div>
           <ul className="space-y-3">
             {advice.strengths.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-primary)' }}>
-                <CheckCircle size={14} color="#22c55e" className="mt-0.5 flex-shrink-0" />
-                <span>{item}</span>
-              </li>
+              <BulletItem key={i} item={item} icon={<CheckCircle size={14} color="#22c55e" className="mt-0.5 flex-shrink-0" />} dispatch={dispatch} />
             ))}
           </ul>
         </div>
@@ -182,10 +240,7 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
           </div>
           <ul className="space-y-3">
             {advice.weaknesses.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-primary)' }}>
-                <AlertTriangle size={14} color="#eb3b3b" className="mt-0.5 flex-shrink-0" />
-                <span>{item}</span>
-              </li>
+              <BulletItem key={i} item={item} icon={<AlertTriangle size={14} color="#eb3b3b" className="mt-0.5 flex-shrink-0" />} dispatch={dispatch} />
             ))}
           </ul>
         </div>
@@ -202,13 +257,17 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
           </div>
           <ol className="space-y-3">
             {advice.recommendations.map((item, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm" style={{ color: 'var(--text-primary)' }}>
-                <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: 'var(--accent-red-dim)', color: 'var(--accent-red)' }}>
-                  {i + 1}
-                </span>
-                <span>{item}</span>
-              </li>
+              <BulletItem
+                key={i}
+                item={item}
+                icon={
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{ background: 'var(--accent-red-dim)', color: 'var(--accent-red)' }}>
+                    {i + 1}
+                  </span>
+                }
+                dispatch={dispatch}
+              />
             ))}
           </ol>
         </div>
@@ -362,6 +421,30 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
         </button>
       </div>
     </div>
+  )
+}
+
+function BulletItem({ item, icon, dispatch }: {
+  item: AdviceBullet;
+  icon: React.ReactNode;
+  dispatch: ReturnType<typeof useReport>['dispatch'];
+}) {
+  return (
+    <li className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-primary)' }}>
+      {icon}
+      <div>
+        <span>{item.text}</span>
+        {item.related_tab != null && (
+          <button
+            onClick={() => dispatch({ type: 'SET_TAB', payload: item.related_tab! })}
+            className="inline-flex items-center gap-0.5 ml-1.5 text-xs font-medium hover:underline transition-colors"
+            style={{ color: '#3b82f6' }}
+          >
+            View {TAB_LABELS[item.related_tab!]} <ArrowRight size={10} />
+          </button>
+        )}
+      </div>
+    </li>
   )
 }
 

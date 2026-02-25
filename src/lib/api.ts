@@ -18,11 +18,14 @@ export async function uploadReport(file: File): Promise<ReportData> {
   return res.json();
 }
 
-export async function fetchAdvice(report: ReportData): Promise<AdviceResponse> {
+export async function fetchAdvice(
+  report: ReportData,
+  tone: 'helpful' | 'roast' = 'helpful',
+): Promise<AdviceResponse> {
   const res = await fetch('/api/advice', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(report),
+    body: JSON.stringify({ report, tone }),
   });
 
   if (!res.ok) {

@@ -37,10 +37,16 @@ export interface AdviceMetrics {
   overall_score: string;
 }
 
+export interface AdviceBullet {
+  text: string;
+  related_tab: number | null;
+}
+
 export interface AdviceResponse {
-  strengths: string[];
-  weaknesses: string[];
-  recommendations: string[];
+  summary: string;
+  strengths: AdviceBullet[];
+  weaknesses: AdviceBullet[];
+  recommendations: AdviceBullet[];
   kelly_fraction: number;
   half_kelly_fraction: number;
   kelly_pct: number;
