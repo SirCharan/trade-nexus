@@ -111,13 +111,13 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
         background: 'linear-gradient(135deg, rgba(235, 59, 59, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%)',
         border: '1px solid var(--border-subtle)',
       }}>
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-xl" style={{ background: 'var(--accent-red-dim)' }}>
               <BrainCircuit size={28} color="var(--accent-red)" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 AI Trader Advice
               </h1>
               <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
@@ -153,7 +153,7 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
       </div>
 
       {/* Three Column Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Strengths */}
         <div className="card" style={{ borderColor: 'rgba(34, 197, 94, 0.2)' }}>
           <div className="flex items-center gap-2 mb-4">
@@ -341,7 +341,7 @@ export default function TraderAdvice({ report }: TraderAdviceProps) {
       </div>
 
       {/* Navigation Links */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={() => dispatch({ type: 'SET_TAB', payload: 0 })}
           className="btn-secondary"

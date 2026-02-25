@@ -77,7 +77,7 @@ export default function InstrumentBreakdown({ data }: { data: InstrumentData }) 
   return (
     <div className="space-y-6">
       {/* Row 1: 5 StatCards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
         <StatCard
           label="Futures P&L"
           value={formatCurrency(data.futures_pnl)}

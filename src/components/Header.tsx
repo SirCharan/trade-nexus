@@ -53,22 +53,24 @@ export default function Header({ onMenuClick }: HeaderProps) {
           )}
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3">
         {state.report && (
           <>
-            <div className="badge">
-              <FileSpreadsheet size={12} />
-              {state.fileName}
-            </div>
-            <div className="badge">
-              {state.report.metadata.date_range}
-            </div>
-            <div className={cn('badge', 'badge-success')}>
-              {state.report.metadata.total_symbols} symbols
+            <div className="hidden md:flex items-center gap-3">
+              <div className="badge">
+                <FileSpreadsheet size={12} />
+                {state.fileName}
+              </div>
+              <div className="badge">
+                {state.report.metadata.date_range}
+              </div>
+              <div className={cn('badge', 'badge-success')}>
+                {state.report.metadata.total_symbols} symbols
+              </div>
             </div>
             <button className="btn-secondary" onClick={handleDownloadJSON}>
               <Download size={14} />
-              JSON
+              <span className="hidden md:inline">JSON</span>
             </button>
           </>
         )}
@@ -85,7 +87,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         />
         <button className="btn-primary" onClick={() => fileRef.current?.click()}>
           <Upload size={16} />
-          Upload Report
+          <span className="hidden md:inline">Upload Report</span>
         </button>
       </div>
     </header>

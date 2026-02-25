@@ -105,9 +105,6 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <p className="text-xs" style={{ color: 'var(--text-muted)', marginTop: -4 }}>
-              Add your name or email for calculating points against your Stocky access
-            </p>
             <textarea
               ref={textareaRef}
               className="modal-input"
@@ -138,6 +135,9 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                 {status === 'sending' ? 'Sending...' : 'Send Feedback'}
               </button>
             </div>
+            <p className="text-xs text-center pt-2" style={{ color: 'var(--text-muted)' }}>
+              Add your name & email for calculating points against your Stocky Access in the future
+            </p>
           </form>
         )}
       </div>

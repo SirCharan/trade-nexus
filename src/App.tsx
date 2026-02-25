@@ -55,9 +55,9 @@ function AppContent() {
     <div className="flex min-h-screen bg-depth">
       <div className="ambient-glow" />
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <main className="main-content flex-1 ml-[260px]">
+      <main className="main-content flex-1 md:ml-[260px]">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <div className="p-6">
+        <div className="p-3 md:p-6">
           <TabContent />
         </div>
       </main>
