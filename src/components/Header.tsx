@@ -4,7 +4,7 @@ import { useReport } from '../context/ReportContext'
 import { uploadReport } from '../lib/api'
 import { cn } from '../lib/utils'
 
-const tabNames = ['Overview', 'Performance Attribution', 'Instrument Breakdown', 'Charges & Costs', 'Open Portfolio']
+const tabNames = ['Overview', 'Performance Attribution', 'Instrument Breakdown', 'Charges & Costs', 'Open Portfolio', 'AI Trader Advice']
 
 interface HeaderProps {
   onMenuClick: () => void;

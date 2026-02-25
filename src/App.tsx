@@ -9,6 +9,7 @@ const PerformanceAttribution = lazy(() => import('./pages/PerformanceAttribution
 const InstrumentBreakdown = lazy(() => import('./pages/InstrumentBreakdown'))
 const ChargesCosts = lazy(() => import('./pages/ChargesCosts'))
 const OpenPortfolio = lazy(() => import('./pages/OpenPortfolio'))
+const TraderAdvice = lazy(() => import('./pages/TraderAdvice'))
 
 function TabContent() {
   const { state } = useReport()
@@ -22,6 +23,7 @@ function TabContent() {
       case 2: return <InstrumentBreakdown data={state.report.instruments} />
       case 3: return <ChargesCosts data={state.report.charges} />
       case 4: return <OpenPortfolio data={state.report.open_portfolio} />
+      case 5: return <TraderAdvice report={state.report} />
       default: return <Overview data={state.report.overview} />
     }
   })()

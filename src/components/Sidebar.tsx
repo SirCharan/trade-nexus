@@ -1,4 +1,4 @@
-import { LayoutDashboard, TrendingUp, Layers, Receipt, Briefcase, Settings } from 'lucide-react'
+import { LayoutDashboard, TrendingUp, Layers, Receipt, Briefcase, BrainCircuit, Settings } from 'lucide-react'
 import { useReport } from '../context/ReportContext'
 import { cn } from '../lib/utils'
 
@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Instrument Breakdown', icon: Layers },
   { label: 'Charges & Costs', icon: Receipt },
   { label: 'Open Portfolio', icon: Briefcase },
+  { label: 'AI Trader Advice', icon: BrainCircuit },
 ]
 
 interface SidebarProps {
