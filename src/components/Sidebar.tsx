@@ -1,6 +1,8 @@
-import { LayoutDashboard, TrendingUp, Layers, Receipt, Briefcase, BrainCircuit, Settings } from 'lucide-react'
+import { useState } from 'react'
+import { LayoutDashboard, TrendingUp, Layers, Receipt, Briefcase, BrainCircuit, FilePlus, MessageSquare } from 'lucide-react'
 import { useReport } from '../context/ReportContext'
 import { cn } from '../lib/utils'
+import FeedbackModal from './FeedbackModal'
 
 const navItems = [
   { label: 'Overview', icon: LayoutDashboard },
@@ -18,6 +20,7 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const { state, dispatch } = useReport()
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   return (
     <>
@@ -38,13 +41,26 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               {item.label}
             </div>
           ))}
+          {state.report && (
+            <div
+              className="sidebar-nav-item"
+              onClick={() => { dispatch({ type: 'CLEAR' }); onClose(); }}
+            >
+              <FilePlus />
+              New Report
+            </div>
+          )}
           <div className="mt-auto pt-4 border-t border-border-subtle mx-4" />
-          <div className="sidebar-nav-item opacity-50 cursor-not-allowed">
-            <Settings />
-            Settings
+          <div
+            className="sidebar-nav-item"
+            onClick={() => setFeedbackOpen(true)}
+          >
+            <MessageSquare />
+            Send Feedback
           </div>
         </div>
       </nav>
+      <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
     </>
   )
 }

@@ -42,7 +42,15 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <Menu size={20} />
         </button>
         <div className="header-breadcrumb">
-          Dashboard / <span>{tabNames[state.activeTab]}</span>
+          <span
+            className="cursor-pointer hover:text-white transition-colors"
+            onClick={() => dispatch({ type: 'CLEAR' })}
+          >
+            Dashboard
+          </span>
+          {state.report && (
+            <> / <span>{tabNames[state.activeTab]}</span></>
+          )}
         </div>
       </div>
       <div className="flex items-center gap-3">

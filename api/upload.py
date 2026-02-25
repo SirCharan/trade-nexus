@@ -5,7 +5,11 @@ Accepts a Zerodha F&O P&L Excel file, parses it, computes all analytics, and ret
 import json
 import re
 import io
+import os
 import math
+import uuid
+import urllib.request
+import urllib.error
 from http.server import BaseHTTPRequestHandler
 from collections import defaultdict
 
@@ -565,6 +569,67 @@ def _make_histogram(values: list, num_bins: int = 15, prefix: str = "", suffix: 
     return result
 
 
+# ─── Supabase Storage (best-effort) ──────────────────────────────────────────────
+
+def store_to_supabase(result, filename, file_bytes, request_headers):
+    supabase_url = os.environ.get("SUPABASE_URL", "")
+    supabase_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
+    if not supabase_url or not supabase_key:
+        return
+
+    report_id = str(uuid.uuid4())
+    storage_path = "{}_{}".format(report_id, filename)
+
+    headers = {
+        "apikey": supabase_key,
+        "Authorization": "Bearer {}".format(supabase_key),
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal",
+    }
+
+    row = {
+        "id": report_id,
+        "filename": filename,
+        "ip_address": request_headers.get("X-Forwarded-For", "unknown"),
+        "user_agent": request_headers.get("User-Agent", "unknown"),
+        "date_range": result.get("metadata", {}).get("date_range", ""),
+        "total_symbols": result.get("metadata", {}).get("total_symbols", 0),
+        "net_realized_pnl": result.get("overview", {}).get("net_realized_pnl", 0),
+        "report_json": result,
+        "file_storage_path": storage_path,
+    }
+
+    # Insert report row
+    body = json.dumps(row).encode("utf-8")
+    req = urllib.request.Request(
+        "{}/rest/v1/reports".format(supabase_url),
+        data=body,
+        headers=headers,
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=10)
+    except Exception:
+        pass
+
+    # Upload raw xlsx to Storage bucket
+    storage_headers = {
+        "apikey": supabase_key,
+        "Authorization": "Bearer {}".format(supabase_key),
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }
+    storage_req = urllib.request.Request(
+        "{}/storage/v1/object/xlsx-uploads/{}".format(supabase_url, storage_path),
+        data=file_bytes,
+        headers=storage_headers,
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(storage_req, timeout=15)
+    except Exception:
+        pass
+
+
 # ─── HTTP Handler ───────────────────────────────────────────────────────────────
 
 class handler(BaseHTTPRequestHandler):
@@ -641,6 +706,15 @@ class handler(BaseHTTPRequestHandler):
             parsed = parse_excel(file_bytes)
             result = compute_analytics(parsed)
             result["metadata"]["filename"] = filename
+
+            # Store to Supabase (best-effort)
+            try:
+                store_to_supabase(result, filename, file_bytes, {
+                    "X-Forwarded-For": self.headers.get("X-Forwarded-For", ""),
+                    "User-Agent": self.headers.get("User-Agent", ""),
+                })
+            except Exception:
+                pass
 
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
