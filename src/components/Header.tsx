@@ -30,7 +30,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'trade-nexus-report.json'
+    a.download = 'stocky-analyse-report.json'
     a.click()
     URL.revokeObjectURL(url)
   }

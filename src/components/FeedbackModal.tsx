@@ -40,10 +40,10 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: name || 'Anonymous',
-          email: email || 'not-provided',
+          ...(name.trim() && { name: name.trim() }),
+          ...(email.trim() && { email: email.trim() }),
           message,
-          _subject: 'Trade Nexus Feedback',
+          _subject: 'Stocky Analyse Feedback',
         }),
       })
       if (res.ok) {
@@ -105,6 +105,9 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            <p className="text-xs" style={{ color: 'var(--text-muted)', marginTop: -4 }}>
+              Add your name or email for calculating points against your Stocky access
+            </p>
             <textarea
               ref={textareaRef}
               className="modal-input"

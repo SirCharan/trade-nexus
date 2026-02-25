@@ -575,6 +575,7 @@ def store_to_supabase(result, filename, file_bytes, request_headers):
     supabase_url = os.environ.get("SUPABASE_URL", "")
     supabase_key = os.environ.get("SUPABASE_SERVICE_KEY", "")
     if not supabase_url or not supabase_key:
+        print("[supabase] skipped: no SUPABASE_URL or SUPABASE_SERVICE_KEY")
         return
 
     report_id = str(uuid.uuid4())
@@ -585,6 +586,7 @@ def store_to_supabase(result, filename, file_bytes, request_headers):
         "Authorization": "Bearer {}".format(supabase_key),
         "Content-Type": "application/json",
         "Prefer": "return=minimal",
+        "User-Agent": "StockyAnalyse/1.0",
     }
 
     row = {
@@ -608,15 +610,20 @@ def store_to_supabase(result, filename, file_bytes, request_headers):
         method="POST",
     )
     try:
-        urllib.request.urlopen(req, timeout=10)
-    except Exception:
-        pass
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            print("[supabase] row inserted: {} status={}".format(report_id, resp.status))
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace")
+        print("[supabase] row insert FAILED: status={} body={}".format(e.code, err_body))
+    except Exception as e:
+        print("[supabase] row insert ERROR: {}".format(str(e)))
 
     # Upload raw xlsx to Storage bucket
     storage_headers = {
         "apikey": supabase_key,
         "Authorization": "Bearer {}".format(supabase_key),
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "User-Agent": "StockyAnalyse/1.0",
     }
     storage_req = urllib.request.Request(
         "{}/storage/v1/object/xlsx-uploads/{}".format(supabase_url, storage_path),
@@ -625,9 +632,13 @@ def store_to_supabase(result, filename, file_bytes, request_headers):
         method="POST",
     )
     try:
-        urllib.request.urlopen(storage_req, timeout=15)
-    except Exception:
-        pass
+        with urllib.request.urlopen(storage_req, timeout=15) as resp:
+            print("[supabase] file uploaded: {} status={}".format(storage_path, resp.status))
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace")
+        print("[supabase] file upload FAILED: status={} body={}".format(e.code, err_body))
+    except Exception as e:
+        print("[supabase] file upload ERROR: {}".format(str(e)))
 
 
 # ─── HTTP Handler ───────────────────────────────────────────────────────────────

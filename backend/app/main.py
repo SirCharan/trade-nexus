@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.report import router
 
-app = FastAPI(title="Trade Nexus API")
+app = FastAPI(title="Stocky Analyse API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

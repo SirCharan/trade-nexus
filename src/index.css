@@ -103,17 +103,10 @@ body {
     padding: 24px 20px;
     border-bottom: 1px solid var(--border-subtle);
   }
-  .sidebar-logo-mark {
-    width: 32px;
+  .sidebar-logo-img {
     height: 32px;
-    background: var(--accent-gradient);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-    color: white;
+    width: auto;
+    object-fit: contain;
   }
   .sidebar-logo-text {
     font-size: 16px;

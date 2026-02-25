@@ -275,7 +275,7 @@ Use Rs for currency. Reference Kelly Criterion, Pareto 80/20, 1% Risk Rule, Risk
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}",
-            "User-Agent": "TradeNexus/1.0",
+            "User-Agent": "StockyAnalyse/1.0",
         },
         method="POST",
     )

@@ -27,8 +27,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       <div className={cn('sidebar-overlay', open && 'open')} onClick={onClose} />
       <nav className={cn('sidebar', open && 'open')}>
         <div className="sidebar-logo">
-          <div className="sidebar-logo-mark">TN</div>
-          <span className="sidebar-logo-text">TRADE NEXUS</span>
+          <img src="/stocky-logo.png" alt="Stocky" className="sidebar-logo-img" />
+          <span className="sidebar-logo-text">STOCKY ANALYSE</span>
         </div>
         <div className="sidebar-nav">
           {navItems.map((item, i) => (

@@ -1,4 +1,4 @@
-# Trade Nexus
+# Stocky Analyse
 
 Premium F&O P&L analytics dashboard for Zerodha trading reports. Upload your `.xlsx` P&L report and get deep insights across 5 analytical dimensions.
 
@@ -73,7 +73,7 @@ Upload a Zerodha F&O P&L `.xlsx` file and receive the full analytics JSON.
 ## Project Structure
 
 ```
-trade-nexus/
+stocky-analyse/
 ├── api/upload.py              # Vercel serverless function (Python)
 ├── src/
 │   ├── components/            # Shared UI components
