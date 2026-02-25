@@ -1,8 +1,8 @@
-# Stocky Analyse — Project Summary
+# Trade Nexus — Project Summary
 
 ## Overview
 
-Stocky Analyse is a premium F&O P&L analytics dashboard that transforms Zerodha trading reports into actionable insights. It provides deep analysis across five dimensions: overview metrics, performance attribution, instrument breakdown, charges analysis, and open portfolio tracking.
+Trade Nexus is a premium F&O P&L analytics dashboard that transforms Zerodha trading reports into actionable insights. It provides deep analysis across five dimensions: overview metrics, performance attribution, instrument breakdown, charges analysis, and open portfolio tracking.
 
 ## Problem
 

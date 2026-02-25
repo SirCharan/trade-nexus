@@ -26,7 +26,7 @@ export default function UploadZone() {
   return (
     <div className="max-w-2xl mx-auto mt-10 md:mt-20">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-2">Welcome to Stocky Analyse</h2>
+        <h2 className="text-2xl font-bold mb-2">Welcome to Trade Nexus</h2>
         <p className="text-text-secondary">Upload your Zerodha F&O P&L report to get started</p>
       </div>
 

@@ -1,7 +1,7 @@
-# AI Agent Instructions for Stocky Analyse
+# AI Agent Instructions for Trade Nexus
 
 ## Project Description
-Stocky Analyse is a web-based F&O P&L analytics dashboard. It parses Zerodha trading reports (Excel .xlsx files) and displays interactive charts and tables across 5 analytical tabs.
+Trade Nexus is a web-based F&O P&L analytics dashboard. It parses Zerodha trading reports (Excel .xlsx files) and displays interactive charts and tables across 5 analytical tabs.
 
 ## For AI Agents
 - This is a React + TypeScript frontend with a Python serverless backend

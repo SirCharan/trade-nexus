@@ -1,8 +1,8 @@
-# Stocky Analyse - LLM Context
+# Trade Nexus - LLM Context
 
 ## What is this project?
 
-Stocky Analyse is a web application that analyzes Zerodha F&O (Futures & Options) P&L reports. Users upload an Excel (.xlsx) file exported from Zerodha's console, and the app parses it to display a comprehensive 5-tab analytics dashboard.
+Trade Nexus is a web application that analyzes Zerodha F&O (Futures & Options) P&L reports. Users upload an Excel (.xlsx) file exported from Zerodha's console, and the app parses it to display a comprehensive 5-tab analytics dashboard.
 
 ## Architecture
 

@@ -43,7 +43,7 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
           ...(name.trim() && { name: name.trim() }),
           ...(email.trim() && { email: email.trim() }),
           message,
-          _subject: 'Stocky Analyse Feedback',
+          _subject: 'Trade Nexus Feedback',
         }),
       })
       if (res.ok) {
@@ -136,7 +136,7 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               </button>
             </div>
             <p className="text-xs text-center pt-2" style={{ color: 'var(--text-muted)' }}>
-              Add your name & email for calculating points against your Stocky Access in the future
+              Add your name & email for calculating points against your Trade Nexus access in the future
             </p>
           </form>
         )}

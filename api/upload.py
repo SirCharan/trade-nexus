@@ -586,7 +586,7 @@ def store_to_supabase(result, filename, file_bytes, request_headers):
         "Authorization": "Bearer {}".format(supabase_key),
         "Content-Type": "application/json",
         "Prefer": "return=minimal",
-        "User-Agent": "StockyAnalyse/1.0",
+        "User-Agent": "TradeNexus/1.0",
     }
 
     row = {
@@ -623,7 +623,7 @@ def store_to_supabase(result, filename, file_bytes, request_headers):
         "apikey": supabase_key,
         "Authorization": "Bearer {}".format(supabase_key),
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "User-Agent": "StockyAnalyse/1.0",
+        "User-Agent": "TradeNexus/1.0",
     }
     storage_req = urllib.request.Request(
         "{}/storage/v1/object/xlsx-uploads/{}".format(supabase_url, storage_path),
