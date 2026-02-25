@@ -6,8 +6,9 @@ import Header from './components/Header'
 import UploadZone from './components/UploadZone'
 import DateRangePicker from './components/DateRangePicker'
 import { formatCurrency } from './lib/utils'
-import { uploadReport } from './lib/api'
+import { uploadReport, analyzeTradebook } from './lib/api'
 
+// XLSX pages
 const Overview = lazy(() => import('./pages/Overview'))
 const PerformanceAttribution = lazy(() => import('./pages/PerformanceAttribution'))
 const InstrumentBreakdown = lazy(() => import('./pages/InstrumentBreakdown'))
@@ -15,22 +16,45 @@ const ChargesCosts = lazy(() => import('./pages/ChargesCosts'))
 const OpenPortfolio = lazy(() => import('./pages/OpenPortfolio'))
 const TraderAdvice = lazy(() => import('./pages/TraderAdvice'))
 
+// CSV pages
+const CsvOverview = lazy(() => import('./pages/csv/CsvOverview'))
+const CsvPnlAnalysis = lazy(() => import('./pages/csv/CsvPnlAnalysis'))
+const CsvInstrumentAnalysis = lazy(() => import('./pages/csv/CsvInstrumentAnalysis'))
+const CsvExpiryAnalysis = lazy(() => import('./pages/csv/CsvExpiryAnalysis'))
+const CsvRiskMetrics = lazy(() => import('./pages/csv/CsvRiskMetrics'))
+const CsvTradeLog = lazy(() => import('./pages/csv/CsvTradeLog'))
+
 function TabContent() {
-  const { state, dispatch } = useReport()
+  const { state } = useReport()
 
-  if (!state.report) return <UploadZone />
+  if (!state.report && !state.csvReport) return <UploadZone />
 
-  const page = (() => {
+  let page: React.ReactNode
+
+  if (state.reportType === 'csv' && state.csvReport) {
+    const d = state.csvReport
     switch (state.activeTab) {
-      case 0: return <Overview data={state.report.overview} instruments={state.report.instruments} />
-      case 1: return <PerformanceAttribution data={state.report.performance} />
-      case 2: return <InstrumentBreakdown data={state.report.instruments} />
-      case 3: return <ChargesCosts data={state.report.charges} />
-      case 4: return <OpenPortfolio data={state.report.open_portfolio} />
-      case 5: return <TraderAdvice report={state.report} />
-      default: return <Overview data={state.report.overview} instruments={state.report.instruments} />
+      case 0: page = <CsvOverview data={d.overview} />; break
+      case 1: page = <CsvPnlAnalysis data={d.pnl_analysis} />; break
+      case 2: page = <CsvInstrumentAnalysis data={d.instrument_analysis} />; break
+      case 3: page = <CsvExpiryAnalysis data={d.expiry_analysis} />; break
+      case 4: page = <CsvRiskMetrics data={d.risk_metrics} />; break
+      case 5: page = <CsvTradeLog data={d.trade_log} />; break
+      default: page = <CsvOverview data={d.overview} />
     }
-  })()
+  } else if (state.report) {
+    switch (state.activeTab) {
+      case 0: page = <Overview data={state.report.overview} instruments={state.report.instruments} />; break
+      case 1: page = <PerformanceAttribution data={state.report.performance} />; break
+      case 2: page = <InstrumentBreakdown data={state.report.instruments} />; break
+      case 3: page = <ChargesCosts data={state.report.charges} />; break
+      case 4: page = <OpenPortfolio data={state.report.open_portfolio} />; break
+      case 5: page = <TraderAdvice report={state.report} />; break
+      default: page = <Overview data={state.report.overview} instruments={state.report.instruments} />
+    }
+  } else {
+    return <UploadZone />
+  }
 
   return (
     <Suspense fallback={<LoadingShimmer />}>
@@ -53,7 +77,6 @@ function LoadingShimmer() {
 }
 
 function parseDateRange(dateRange: string): { start: Date; end: Date } {
-  // Format: "01 Jun 2025 - 01 Dec 2025"
   const parts = dateRange.split(' - ')
   const parse = (s: string) => {
     const d = new Date(s)
@@ -70,17 +93,24 @@ function DateRangeBar() {
   const [pickerOpen, setPickerOpen] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  if (!state.report) return null
+  const metadata = state.report?.metadata || state.csvReport?.metadata
+  if (!metadata) return null
 
-  const { date_range, total_symbols } = state.report.metadata
-  const netPnl = state.report.overview.net_realized_pnl
+  const { date_range, total_symbols } = metadata
+  const netPnl = state.report?.overview.net_realized_pnl ?? state.csvReport?.overview.total_pnl ?? 0
   const { start, end } = parseDateRange(date_range)
 
   const handleUpload = async (file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase()
     dispatch({ type: 'SET_LOADING' })
     try {
-      const data = await uploadReport(file)
-      dispatch({ type: 'SET_REPORT', payload: data, fileName: file.name })
+      if (ext === 'csv') {
+        const data = await analyzeTradebook(file)
+        dispatch({ type: 'SET_CSV_REPORT', payload: data, fileName: file.name })
+      } else {
+        const data = await uploadReport(file)
+        dispatch({ type: 'SET_REPORT', payload: data, fileName: file.name })
+      }
     } catch (e: unknown) {
       dispatch({ type: 'SET_ERROR', payload: e instanceof Error ? e.message : 'Upload failed' })
     }
@@ -132,7 +162,7 @@ function DateRangeBar() {
       <input
         ref={fileRef}
         type="file"
-        accept=".xlsx"
+        accept=".xlsx,.csv"
         className="hidden"
         onChange={(e) => {
           const f = e.target.files?.[0]

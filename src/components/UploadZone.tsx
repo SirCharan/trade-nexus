@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { Upload, FileSpreadsheet, AlertCircle, Loader2 } from 'lucide-react'
 import { useReport } from '../context/ReportContext'
-import { uploadReport } from '../lib/api'
+import { uploadReport, analyzeTradebook } from '../lib/api'
 import { cn } from '../lib/utils'
 
 export default function UploadZone() {
@@ -10,14 +10,20 @@ export default function UploadZone() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const handleFile = async (file: File) => {
-    if (!file.name.endsWith('.xlsx')) {
-      dispatch({ type: 'SET_ERROR', payload: 'Please upload an .xlsx file' })
+    const ext = file.name.split('.').pop()?.toLowerCase()
+    if (ext !== 'xlsx' && ext !== 'csv') {
+      dispatch({ type: 'SET_ERROR', payload: 'Please upload an .xlsx or .csv file' })
       return
     }
     dispatch({ type: 'SET_LOADING' })
     try {
-      const data = await uploadReport(file)
-      dispatch({ type: 'SET_REPORT', payload: data, fileName: file.name })
+      if (ext === 'csv') {
+        const data = await analyzeTradebook(file)
+        dispatch({ type: 'SET_CSV_REPORT', payload: data, fileName: file.name })
+      } else {
+        const data = await uploadReport(file)
+        dispatch({ type: 'SET_REPORT', payload: data, fileName: file.name })
+      }
     } catch (e: unknown) {
       dispatch({ type: 'SET_ERROR', payload: e instanceof Error ? e.message : 'Upload failed' })
     }
@@ -27,7 +33,7 @@ export default function UploadZone() {
     <div className="max-w-2xl mx-auto mt-10 md:mt-20">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold mb-2">Welcome to Trade Nexus</h2>
-        <p className="text-text-secondary">Upload your Zerodha F&O P&L report to get started</p>
+        <p className="text-text-secondary">Upload your Zerodha F&O report to get started</p>
       </div>
 
       <div
@@ -45,7 +51,7 @@ export default function UploadZone() {
         <input
           ref={fileRef}
           type="file"
-          accept=".xlsx"
+          accept=".xlsx,.csv"
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0]
@@ -65,10 +71,10 @@ export default function UploadZone() {
               {dragOver ? <FileSpreadsheet size={32} className="text-accent-red" /> : <Upload size={32} className="text-accent-red" />}
             </div>
             <div>
-              <p className="font-semibold text-lg">Drop your .xlsx file here</p>
+              <p className="font-semibold text-lg">Drop your file here</p>
               <p className="text-text-secondary text-sm mt-1">or click to browse</p>
             </div>
-            <p className="text-text-muted text-xs">Supports Zerodha F&O P&L reports (.xlsx)</p>
+            <p className="text-text-muted text-xs">Supports Zerodha F&O P&L reports (.xlsx) and tradebook exports (.csv)</p>
           </div>
         )}
       </div>

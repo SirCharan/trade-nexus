@@ -1,5 +1,6 @@
 import type { ReportData } from '../types/report'
 import type { AdviceResponse } from '../types/advice'
+import type { CsvReportData } from '../types/csvReport'
 
 export async function uploadReport(file: File): Promise<ReportData> {
   const formData = new FormData();
@@ -31,6 +32,23 @@ export async function fetchAdvice(
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Advice generation failed' }));
     throw new Error(err.error || `Failed (${res.status})`);
+  }
+
+  return res.json();
+}
+
+export async function analyzeTradebook(file: File): Promise<CsvReportData> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch('/api/analyze', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Analysis failed' }));
+    throw new Error(err.error || `Analysis failed (${res.status})`);
   }
 
   return res.json();

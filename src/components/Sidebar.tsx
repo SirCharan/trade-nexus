@@ -1,16 +1,25 @@
 import { useState } from 'react'
-import { LayoutDashboard, TrendingUp, Layers, Receipt, Briefcase, BrainCircuit, FilePlus, MessageSquare } from 'lucide-react'
+import { LayoutDashboard, TrendingUp, Layers, Receipt, Briefcase, BrainCircuit, FilePlus, MessageSquare, Calendar, Shield, List } from 'lucide-react'
 import { useReport } from '../context/ReportContext'
 import { cn } from '../lib/utils'
 import FeedbackModal from './FeedbackModal'
 
-const navItems = [
+const xlsxNavItems = [
   { label: 'Overview', icon: LayoutDashboard },
   { label: 'Performance Attribution', icon: TrendingUp },
   { label: 'Instrument Breakdown', icon: Layers },
   { label: 'Charges & Costs', icon: Receipt },
   { label: 'Open Portfolio', icon: Briefcase },
   { label: 'AI Trader Advice', icon: BrainCircuit },
+]
+
+const csvNavItems = [
+  { label: 'Overview', icon: LayoutDashboard },
+  { label: 'P&L Analysis', icon: TrendingUp },
+  { label: 'Instrument Analysis', icon: Layers },
+  { label: 'Expiry Analysis', icon: Calendar },
+  { label: 'Risk & Metrics', icon: Shield },
+  { label: 'Trade Log', icon: List },
 ]
 
 interface SidebarProps {
@@ -21,6 +30,8 @@ interface SidebarProps {
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const { state, dispatch } = useReport()
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+
+  const navItems = state.reportType === 'csv' ? csvNavItems : xlsxNavItems
 
   return (
     <>
@@ -40,7 +51,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               {item.label}
             </div>
           ))}
-          {state.report && (
+          {(state.report || state.csvReport) && (
             <div
               className="sidebar-nav-item"
               onClick={() => { dispatch({ type: 'CLEAR' }); onClose(); }}

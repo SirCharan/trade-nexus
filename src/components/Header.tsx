@@ -1,10 +1,11 @@
-import { Upload, FileSpreadsheet, Menu, Download } from 'lucide-react'
+import { Upload, FileSpreadsheet, FileText, Menu, Download } from 'lucide-react'
 import { useRef } from 'react'
 import { useReport } from '../context/ReportContext'
-import { uploadReport } from '../lib/api'
+import { uploadReport, analyzeTradebook } from '../lib/api'
 import { cn } from '../lib/utils'
 
-const tabNames = ['Overview', 'Performance Attribution', 'Instrument Breakdown', 'Charges & Costs', 'Open Portfolio', 'AI Trader Advice']
+const xlsxTabNames = ['Overview', 'Performance Attribution', 'Instrument Breakdown', 'Charges & Costs', 'Open Portfolio', 'AI Trader Advice']
+const csvTabNames = ['Overview', 'P&L Analysis', 'Instrument Analysis', 'Expiry Analysis', 'Risk & Metrics', 'Trade Log']
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -14,19 +15,33 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const { state, dispatch } = useReport()
   const fileRef = useRef<HTMLInputElement>(null)
 
+  const tabNames = state.reportType === 'csv' ? csvTabNames : xlsxTabNames
+  const hasReport = state.report || state.csvReport
+
   const handleUpload = async (file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase()
+    if (ext !== 'xlsx' && ext !== 'csv') {
+      dispatch({ type: 'SET_ERROR', payload: 'Please upload an .xlsx or .csv file' })
+      return
+    }
     dispatch({ type: 'SET_LOADING' })
     try {
-      const data = await uploadReport(file)
-      dispatch({ type: 'SET_REPORT', payload: data, fileName: file.name })
+      if (ext === 'csv') {
+        const data = await analyzeTradebook(file)
+        dispatch({ type: 'SET_CSV_REPORT', payload: data, fileName: file.name })
+      } else {
+        const data = await uploadReport(file)
+        dispatch({ type: 'SET_REPORT', payload: data, fileName: file.name })
+      }
     } catch (e: unknown) {
       dispatch({ type: 'SET_ERROR', payload: e instanceof Error ? e.message : 'Upload failed' })
     }
   }
 
   const handleDownloadJSON = () => {
-    if (!state.report) return
-    const blob = new Blob([JSON.stringify(state.report, null, 2)], { type: 'application/json' })
+    const reportData = state.report || state.csvReport
+    if (!reportData) return
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -34,6 +49,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
     a.click()
     URL.revokeObjectURL(url)
   }
+
+  const metadata = state.report?.metadata || state.csvReport?.metadata
 
   return (
     <header className="header">
@@ -48,24 +65,24 @@ export default function Header({ onMenuClick }: HeaderProps) {
           >
             Dashboard
           </span>
-          {state.report && (
+          {hasReport && (
             <> / <span>{tabNames[state.activeTab]}</span></>
           )}
         </div>
       </div>
       <div className="flex items-center gap-2 md:gap-3">
-        {state.report && (
+        {hasReport && metadata && (
           <>
             <div className="hidden md:flex items-center gap-3">
               <div className="badge">
-                <FileSpreadsheet size={12} />
+                {state.reportType === 'csv' ? <FileText size={12} /> : <FileSpreadsheet size={12} />}
                 {state.fileName}
               </div>
               <div className="badge">
-                {state.report.metadata.date_range}
+                {metadata.date_range}
               </div>
               <div className={cn('badge', 'badge-success')}>
-                {state.report.metadata.total_symbols} symbols
+                {metadata.total_symbols} symbols
               </div>
             </div>
             <button className="btn-secondary" onClick={handleDownloadJSON}>
@@ -77,7 +94,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <input
           ref={fileRef}
           type="file"
-          accept=".xlsx"
+          accept=".xlsx,.csv"
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0]
